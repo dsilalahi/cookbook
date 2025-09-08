@@ -39,7 +39,7 @@ Data partitioning in Microsoft Fabric Lakehouse can significantly improve query 
 
 ## 6. Optimize Query Performance
 - **Use partition pruning**: Ensure queries include filters on the partition key to avoid scanning unnecessary partitions.
-- **Combine partitioning with clustering**: Clustering data on frequently queried columns within each partition can further speed up queries.
+- **Combine partitioning with clustering**: Clusterinlsg data on frequently queried columns within each partition can further speed up queries.
 - **Test and iterate**: Regularly analyze query plans and optimize partitions if you notice performance bottlenecks.
 
 ---
