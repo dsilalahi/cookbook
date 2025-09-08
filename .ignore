@@ -117,3 +117,5 @@ logs/
 *.swp
 *~
 *.tmp
+
+python/resize_images/
