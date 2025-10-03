@@ -1,5 +1,6 @@
 Database Type,Capabilities,Benefits,Limitations,Step-by-Step Implementation
-Azure SQL Database,"- Near real-time replication of databases and tables into OneLake in Delta Lake format.
+Azure SQL Database,"
+- Near real-time replication of databases and tables into OneLake in Delta Lake format.
 - Supports cross-database queries using T-SQL.
 - Analytics-ready for data engineering, science, and Power BI visualization.
 - Mirror all data or select specific tables.
