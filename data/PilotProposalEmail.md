@@ -1,59 +1,108 @@
-### High-Level Summary of Microsoft Purview Third-Party Connection Capabilities
-
-Microsoft Purview's third-party connection capabilities enable organizations to import, archive, and govern non-Microsoft data sources within Microsoft 365, ensuring compliance with regulatory standards while minimizing risks like data loss or insider threats. This functionality is particularly valuable for enterprises managing diverse data ecosystems, allowing seamless application of Microsoft Purview tools such as retention policies and eDiscovery to external data stored in user mailboxes. As of 2025, the system supports a broad range of connectors with ongoing enhancements, including a new connector for Hong Kong CSL SMS/MMS data introduced in February.
-
-#### Major Components
-1. **Data Import and Archiving**:
-   - Administrators configure connectors in the Microsoft Purview portal to pull data from external platforms into Microsoft 365 mailboxes.
-   - Native connectors (built by Microsoft) require no additional setup beyond portal configuration, while partner connectors (e.g., from TeleMessage, 17a-4 LLC, or CellTrust) involve provisioning a service principal via PowerShell and coordinating with the partner for data archiving services.
-   - This creates a unified repository for third-party data, supporting trial access for non-E5 customers via a 90-day Purview solutions trial.
-
-2. **Supported Data Sources**:
-   - **Native Connectors**: Include platforms like LinkedIn, Twitter (now X), Facebook, ChatGPT Enterprise AI interactions, Bloomberg Message, Instant Bloomberg, Generic EHR (healthcare), HR systems, ICE Chat, and Physical Badging.
-   - **Partner Connectors**: Cover messaging and collaboration tools such as WhatsApp, Telegram, Slack, Zoom, WeChat, Signal, Cisco Webex, Symphony, and various mobile/SMS networks (e.g., Android, Verizon, T-Mobile).
-   - Government cloud support (GCC) is available for select partners, but limited or absent in GCC High/DoD environments.
-
-3. **Integration and Extensibility**:
-   - Extends Purview via Microsoft Graph APIs for eDiscovery, retention labels, Teams DLP (data loss prevention), Teams Export, and subject rights requests, enabling programmatic management and integration with non-Microsoft systems.
-   - Microsoft Information Protection (MIP) SDK allows third-party apps to apply sensitivity labels and encryption.
-   - Graph Connector APIs (in preview) index external data for Microsoft Search, enhancing discoverability across ecosystems.
-
-4. **Compliance and Risk Management Features**:
-   - **Retention and Records Management**: Apply time-based or event-triggered policies to retain, delete, or declare data as records, with auto-labeling based on content or sensitivity.
-   - **eDiscovery and Litigation Hold**: Search, hold, and analyze data for investigations, including themes and duplicate detection.
-   - **Insider Risk Management**: Detects risky behaviors using signals from HR, physical access, or other third-party data.
-   - **Communication Compliance**: Scans for policy violations like offensive content or sensitive information sharing.
-
-5. **Search and Querying**:
-   - Use Content Search or eDiscovery tools with queries like "kind:externaldata" or specific item classes (e.g., "itemclass:ipm.externaldata.facebook*") to filter and retrieve archived data.
-
-#### Benefits for Executives
-- Centralizes governance of fragmented data, reducing compliance risks and operational silos.
-- Scales with enterprise needs through APIs and SDKs, supporting custom integrations.
-- Enhances efficiency in audits, legal holds, and risk mitigation, potentially lowering costs associated with data breaches or non-compliance.
-
-#### Key Considerations
-- Veritas connectors were retired in June 2024, requiring migration if previously used.
-- Partner setups may involve additional costs and relationships; ensure alignment with licensing (e.g., E5 or trial).
-- Limited support in high-security government clouds; test for compatibility in regulated industries.
-
-This framework positions Purview as a robust tool for data sovereignty in hybrid environments, with 2025 updates focusing on niche connectors like regional SMS archiving.
-
-### Questions to Ask Clients to Better Understand Their Problem
-To tailor solutions and uncover specific pain points related to third-party data management in Microsoft Purview, consider asking these targeted questions during discovery discussions:
-
-1. **Data Sources and Usage**: What third-party platforms (e.g., Slack, WhatsApp, Zoom, or custom HR systems) does your organization use for communication, collaboration, or data storage, and how critical is their data to your operations?
-   
-2. **Compliance Requirements**: What regulatory standards (e.g., GDPR, HIPAA, SEC) apply to your industry, and how do you currently handle retention, eDiscovery, or auditing for non-Microsoft data?
-
-3. **Current Challenges**: What pain points are you experiencing with data governance, such as fragmented archiving, search inefficiencies, insider risks, or integration gaps with existing tools?
-
-4. **Integration Needs**: Do you require custom APIs, SDKs, or automation for connecting third-party data (e.g., via Microsoft Graph), and what extensibility features would be most valuable?
-
-5. **Scale and Environment**: How many users or data volumes are involved, and are you operating in a standard commercial environment or a government cloud (e.g., GCC, GCC High)?
-
-6. **Risk and Security Focus**: Have you encountered issues with data loss prevention, litigation holds, or detecting risky behaviors from external sources, and what outcomes are you aiming for (e.g., faster investigations, reduced breaches)?
-
-7. **Budget and Timeline**: What is your timeline for implementation, and are there budget constraints or licensing considerations (e.g., E5 vs. trial) that could impact adoption?
-
-These questions help build a client-specific roadmap, identifying quick wins like native connectors while addressing complex needs through extensibility.
+Database Type,Capabilities,Benefits,Limitations,Step-by-Step Implementation
+Azure SQL Database,"- Near real-time replication of databases and tables into OneLake in Delta Lake format.
+- Supports cross-database queries using T-SQL.
+- Analytics-ready for data engineering, science, and Power BI visualization.
+- Mirror all data or select specific tables.
+- Automatic synchronization of metadata and data changes.","- Low-cost and low-latency data integration without ETL pipelines.
+- Enables up-to-date analytics and breaks data silos.
+- Free storage up to capacity-based limit (e.g., 1 TB per unit).
+- Free background compute for replication.
+- Supports secure sharing with RLS and OLS.
+- Integrates with Direct Lake for high-performance querying.
+- Customizable data retention (default 1-7 days).","- Supported only on writable primary databases.
+- Cannot mirror if CDC, Azure Synapse Link, or already mirrored elsewhere.
+- Max 500 tables.
+- Requires specific permissions (ALTER ANY EXTERNAL MIRROR, etc.).
+- No propagation of row/object permissions, dynamic masking, sensitivity labels.
+- SAMI must be enabled and primary.
+- No cross-tenant mirroring.
+- Unsupported primary key types: sql_variant, timestamp.
+- Precision loss for datetime2(7), etc.
+- No clustered columnstore indexes.
+- LOB >1MB truncated.
+- Unsupported features: temporal/ledger history, Always Encrypted, in-memory, graph, external tables.
+- No DDL ops like switch partition, alter PK.
+- DDL changes restart full snapshot.
+- No json/vector types.
+- No computed columns.
+- Unsupported data types: image, text/ntext, xml, rowversion, sql_variant.
+- Delayed durability not supported.
+- .dacpac needs /p:DoNotAlterReplicatedObjects=False.","1. Enable System Assigned Managed Identity (SAMI) on Azure SQL Logical Server via Azure portal (Security > Identity > On).
+2. Verify SAMI with T-SQL: SELECT * FROM sys.dm_server_managed_identities.
+3. Create database principal: Connect to master DB, create login (SQL/Entra/SPN/Workspace), add to ##MS_ServerStateReader## role.
+4. Connect to user DB, create user, grant SELECT and ALTER ANY EXTERNAL MIRROR.
+5. In Fabric portal, create Mirrored Azure SQL Database in workspace.
+6. Connect to Azure SQL DB: Provide server, database, auth details (Basic/Org/Service Principal/Workspace).
+7. Configure mirroring: Mirror all or select tables, start mirroring.
+8. Monitor replication status until Running."
+SQL Server,"- Near real-time replication into OneLake in Delta Lake format.
+- Supports cross-database queries.
+- Analytics-ready for various workloads.
+- Mirror all or specific tables.
+- Synchronization of changes.","- Same as above: Low-cost, no ETL, free storage/compute up to limits, secure sharing, Direct Lake integration, customizable retention.","- Preview feature.
+- Supported only on primary DB of availability group.
+- Not for SQL Server 2025 on Azure VM or Linux.
+- Cannot mirror if Azure Synapse Link or already mirrored.
+- No CDC for SQL 2025.
+- Max 500 tables.
+- Permissions not propagated (row/object, masking, labels).
+- Principal needs ALTER ANY EXTERNAL MIRROR.
+- No cross-tenant.
+- Unsupported PK types: sql_variant, timestamp.
+- For 2016-2022: Requires PK.
+- Precision loss for datetime2(7), etc.
+- No clustered columnstore.
+- LOB >1MB truncated.
+- Unsupported: temporal/ledger, Always Encrypted, in-memory, graph, external tables.
+- No DDL: switch partition, alter PK.
+- DDL changes restart snapshot.
+- No json/vector.
+- Unsupported data types: CLR, vector, json, geometry, geography, hierarchyid, sql_variant, timestamp, xml, UDT, image, text/ntext.
+- No computed columns.
+- Columns with spaces/special chars supported but may need quoting.
+- Delayed durability not supported.
+- .dacpac needs specific property.","1. Ensure prerequisites: SQL instance meets requirements, create principal.
+2. Create login in master DB (SQL/Entra), add to ##MS_ServerStateReader##.
+3. For Always On: Create login on all instances with same SID.
+4. In user DB: Create user, grant SELECT and ALTER ANY EXTERNAL MIRROR.
+5. For SQL 2025: Connect server to Azure Arc, enable managed identity via PowerShell script to add registry keys.
+6. In Fabric portal, create Mirrored SQL Server Database.
+7. Connect: Provide server, database, auth details.
+8. Configure: Mirror all or select tables, start.
+9. Monitor until Running."
+Azure Cosmos DB,"- Near real-time replication from NoSQL accounts into OneLake Delta tables.
+- Supports querying source via data explorer (read-only).
+- Analytics via SQL endpoint with aggregates and joins.
+- Mirror entire DB or specific containers.
+- Integrates with Fabric workloads.","- Same general benefits.
+- No impact on source performance.
+- Enables analytical queries without RUs on mirrored data.
+- Simplifies integration with Fabric ecosystem.","- Preview feature.
+- Requires continuous backup (7/30 days).
+- Public network access only.
+- Mirror one DB at a time.
+- Can mirror same DB multiple times in workspace.
+- Requires specific RBAC for Entra auth.
+- Reads on source consume RUs.
+- Account/database limitations per continuous backup docs.","1. In Azure portal: Enable continuous backup, set public access.
+2. In Fabric: Create Mirrored Azure Cosmos DB (Preview) in workspace.
+3. Connect: Provide endpoint, auth (Account key/Org), select DB/containers.
+4. Start mirroring.
+5. Monitor replication.
+6. Query source via View > Source database.
+7. Analyze mirrored via SQL analytics endpoint, run queries/joins."
+Snowflake,"- Near real-time replication into OneLake Delta tables.
+- Supports any Snowflake version/cloud.
+- Mirror all data (including future tables) or specific tables.
+- Secure connections via gateways for private networks.","- Same general benefits.
+- Enables Snowflake data in Fabric analytics.
+- Real-time sync with monitoring.","- Max 500 tables.
+- Granular security must be re-configured in Fabric.
+- Replicator backs off up to 1 hour if no updates.
+- Requires specific permissions: CREATE STREAM, SELECT/SHOW/DESCRIBE tables.
+- Needs gateway for private networks.","1. Ensure prerequisites: Snowflake warehouse, Fabric capacity, user permissions, networking.
+2. In Fabric: Create Mirrored Snowflake in workspace.
+3. Connect: Provide server, warehouse, auth (username/password), gateway if needed, select DB.
+4. Configure: Mirror all or select tables.
+5. Start mirroring.
+6. Monitor replication status."
